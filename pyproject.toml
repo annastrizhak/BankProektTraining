@@ -1,0 +1,128 @@
+[tool.poetry]
+name = "myawesomeproject"
+version = "0.1.0"
+description = ""
+authors = ["hp <anianna@inbox.ru>"]
+readme = "README.md"
+packages = [{ include = "src/myawesomeproject" }]
+
+[tool.poetry.dependencies]
+python = "^3.13"
+
+[tool.poetry.group.lint.dependencies]
+flake8 = "^7.3.0"
+black = "^25.9.0"
+isort = "^7.0.0"
+mypy = "^1.18.2"
+
+[tool.poetry.dev.dependencies]
+pytest = "^7.3.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 119
+target-version = ["py313"]
+skip-string-normalization = true
+include = "\\.py$|\\.pyi$"
+exclude = """
+/(
+    \\.git|
+    \\.hg|
+    \\.mypy_cache|
+    \\.pytest_cache|
+    \\.venv|
+    node_modules|
+    venv|
+    build|
+    dist|
+    sdist|
+    wheel|
+    eggs|
+    \\*\\.egg-info|
+    __pycache__|
+    migrations|
+    docs_build|
+    \\.tox|
+    \\.cache|
+    vendor|
+    \\.ipynb_checkpoints|
+    \\.*\\.sqlite3$
+)/"""
+
+[tool.isort]
+line_length = 119
+known_first_party = ["src"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+profile = "black"
+
+[tool.flake8]
+max-line-length = 119
+ignore = [
+    "E203",
+    "W503",
+    "E501"
+]
+exclude = """
+/(
+    \\.git|
+    \\.hg|
+    \\.mypy_cache|
+    \\.pytest_cache|
+    \\.venv|
+    node_modules|
+    venv|
+    build|
+    dist|
+    sdist|
+    wheel|
+    eggs|
+    \\*\\.egg-info|
+    __pycache__|
+    migrations|
+    docs_build|
+    \\.tox|
+    \\.cache|
+    vendor|
+    \\.ipynb_checkpoints|
+    \\.*\\.sqlite3$
+)/"""
+
+[tool.mypy]
+python_version = "3.13"
+disallow_untyped_defs = true
+warn_return_any = true
+strict_equality = true
+ignore_missing_imports = true
+follow_imports = "silent"
+exclude = """
+/(
+    \\.git|
+    \\.hg|
+    \\.mypy_cache|
+    \\.pytest_cache|
+    \\.venv|
+    node_modules|
+    venv|
+    build|
+    dist|
+    sdist|
+    wheel|
+    eggs|
+    \\*\\.egg-info|
+    __pycache__|
+    migrations|
+    docs_build|
+    \\.tox|
+    \\.cache|
+    vendor|
+    \\.ipynb_checkpoints|
+    \\.*\\.sqlite3$
+)/"""
+
+[tool.pytest.ini_options]
+addopts = "-vv --cov-report term-missing --cov=. --color yes"
+testpaths = ["tests"]
+

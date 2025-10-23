@@ -1,48 +1,31 @@
-
 from datetime import datetime
-
-
-def get_mask_card_number(card_number: int) -> str:
-    """Получение маски банковской карты."""
-    card_str = str(card_number)
-    if len(card_str) != 16 or not card_str.isdigit():
-        raise ValueError("Некорректный формат номера карты.")
-    first_part = card_str[:6]
-    last_part = card_str[-4:]
-    masked_middle = "** **"
-    return f"{first_part[:4]} {first_part[4:]} {masked_middle} {last_part}"
-
-
-def get_mask_account(account_number: int) -> str:
-    """Получение маски банковского счёта."""
-    acc_str = str(account_number)
-    if len(acc_str) < 4 or not acc_str.isdigit():
-        raise ValueError("Некорректный формат номера счёта.")
-    return f"**{acc_str[-4:]}"
+from masks import get_mask_card_number, get_mask_account
 
 
 def mask_account_card(data: str) -> str:
     """
-    Функция принимает строку с типом и номером карты/счета и возвращает замаскированное значение.
-
-    :param data: Строка вида "Имя карточки 7000792289606361" или "Счет 73654108430135874305"
-    :return: Замасированная строка
+    Получает строку с типом и номером карты или счета и возвращает замаскированные данные.
+    Аргумент data: строка вида "Visa Platinum 7000792289606361" или "Счет 73654108430135874305".
+    Возвращает строку с замаскированными номерами.
     """
-    parts = data.rsplit(maxsplit=1)  # Разбиение строки на 2 части по последнему пробелу
-    label, number = parts[0], parts[1]
 
-    try:
-        num_int = int(number)
+    # Разделение строки на две части (первая — название карты или счет, вторая — номер)
+    parts = data.strip().split(maxsplit=1)
+    if len(parts) != 2:
+        raise ValueError("Неверный формат входных данных")
 
-        # Определяем, карта это или счёт по количеству цифр
-        if len(str(num_int)) == 16:
-            masked_num = get_mask_card_number(num_int)
-        else:
-            masked_num = get_mask_account(num_int)
+    # Префикс (название карты или счет) и само число
+    prefix, number = parts
+    prefix_lower = prefix.lower()
 
-        return f"{label} {masked_num}"
-    except Exception as e:
-        return f"Ошибка: {str(e)}"
+    # Проверка известного типа карты или счета
+    known_cards = ['maestro', 'mastercard', 'visa']
+    if any(card in prefix_lower for card in known_cards):
+        return get_mask_card_number(number)
+    elif prefix_lower.startswith('счет'):
+        return get_mask_account(number)
+    else:
+        raise ValueError(f"Недопустимый тип платежа '{prefix}'")
 
 
 def get_date(iso_string: str) -> str:
@@ -52,5 +35,6 @@ def get_date(iso_string: str) -> str:
     :param iso_string: Дата в формате ISO 8601, например "2024-03-11T02:26:18.671407"
     :return: Дата в формате "11.03.2024"
     """
+
     dt = datetime.fromisoformat(iso_string)
     return dt.strftime("%d.%m.%Y")

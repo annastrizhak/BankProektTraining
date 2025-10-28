@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from masks import get_mask_card_number, get_mask_account
 
@@ -9,13 +10,13 @@ def mask_account_card(data: str) -> str:
     Возвращает строку с замаскированными номерами.
     """
 
-    # Разделение строки на две части (первая — название карты или счет, вторая — номер)
-    parts = data.strip().split(maxsplit=1)
-    if len(parts) != 2:
+    # Регулярное выражение для поиска пробела перед номером карты или счета
+    match = re.search(r"(\D+)\s+(\d+)", data)
+    if not match:
         raise ValueError("Неверный формат входных данных")
 
     # Префикс (название карты или счет) и само число
-    prefix, number = parts
+    prefix, number = match.groups()
     prefix_lower = prefix.lower()
 
     # Проверка известного типа карты или счета
@@ -36,5 +37,8 @@ def get_date(iso_string: str) -> str:
     :return: Дата в формате "11.03.2024"
     """
 
-    dt = datetime.fromisoformat(iso_string)
-    return dt.strftime("%d.%m.%Y")
+    try:
+        dt = datetime.fromisoformat(iso_string)
+        return dt.strftime("%d.%m.%Y")
+    except ValueError:
+        raise ValueError("Некорректный формат даты")

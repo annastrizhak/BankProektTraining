@@ -6,27 +6,32 @@ from masks import get_mask_card_number, get_mask_account
 def mask_account_card(data: str) -> str:
     """
     Получает строку с типом и номером карты или счета и возвращает замаскированные данные.
+
     Аргумент data: строка вида "Visa Platinum 7000792289606361" или "Счет 73654108430135874305".
     Возвращает строку с замаскированными номерами.
     """
 
-    # Регулярное выражение для поиска пробела перед номером карты или счета
-    match = re.search(r"(\D+)\s+(\d+)", data)
+    # Регулярное выражение для разделения строки на два компонента: префикс и номер
+    match = re.search(r"^(\D+)\s+(\d+)$", data.strip())
     if not match:
         raise ValueError("Неверный формат входных данных")
 
-    # Префикс (название карты или счет) и само число
+    # Префикс (название карты или счёт) и само число
     prefix, number = match.groups()
-    prefix_lower = prefix.lower()
 
-    # Проверка известного типа карты или счета
-    known_cards = ['maestro', 'mastercard', 'visa']
-    if any(card in prefix_lower for card in known_cards):
-        return get_mask_card_number(number)
-    elif prefix_lower.startswith('счет'):
-        return get_mask_account(number)
+    # Определяем тип карточки или счёта
+    known_cards = {'maestro', 'mastercard', 'visa'}
+    if any(card in prefix.lower() for card in known_cards):
+        # Применяем маску для номеров карт
+        masked_number = get_mask_card_number(number)
+    elif prefix.lower().startswith('счет'):
+        # Применяем маску для номеров счетов
+        masked_number = get_mask_account(number)
     else:
         raise ValueError(f"Недопустимый тип платежа '{prefix}'")
+
+    # Формируем итоговую строку с сохранением исходного префикса
+    return f"{prefix} {masked_number}"
 
 
 def get_date(iso_string: str) -> str:

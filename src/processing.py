@@ -16,3 +16,4 @@ def filter_by_state(data: list[dict], state: str = 'EXECUTED') -> list[dict]:
     # у которых значение ключа 'state' совпадает с аргументом.
     filtered_data = [item for item in data if item.get('state') == state]
     return filtered_data
+

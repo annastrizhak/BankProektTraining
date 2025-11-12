@@ -4,14 +4,13 @@
 
 
 def get_mask_card_number(card_number: str) -> str:
-    """Получение маски банковской карты."""
+    """Получение маски банковской карты.
+    Принимает на вход только 16-значный номер карты."""
 
     if len(card_number) != 16 or not card_number.isdigit():
         raise ValueError("Некорректный формат номера карты.")
-    first_part = card_number[:6]
-    last_part = card_number[-4:]
-    masked_middle = "** ****"
-    return f"{first_part[:4]} {first_part[4:6]}{masked_middle} {last_part}"
+
+    return f"{card_number[:4]} {card_number[4:6]}******{card_number[-4:]}"
 
 
 def get_mask_account(account_number: str) -> str:

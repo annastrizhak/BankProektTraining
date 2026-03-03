@@ -3,6 +3,7 @@ import pytest
 from generators import filter_by_currency, transaction_descriptions, card_number_generator
 
 
+# Фикстура с примером транзакций
 @pytest.fixture
 def sample_transactions() -> List[Dict[str, Any]]:
     return [
@@ -12,53 +13,50 @@ def sample_transactions() -> List[Dict[str, Any]]:
     ]
 
 
-def test_filter_by_currency(sample_transactions: List[Dict[str, Any]]) -> None:
-    usd_gen = filter_by_currency(sample_transactions, "USD")
-    assert next(usd_gen)["id"] == 1
-    assert next(usd_gen)["id"] == 3
-    with pytest.raises(StopIteration):
-        next(usd_gen)
+# Тестируем фильтр по валюте с разными значениями валюты
+@pytest.mark.parametrize(
+    "currency_code,expected_ids",
+    [
+        ("USD", [1, 3]),
+        ("EUR", [2]),
+        ("GBP", []),  # Валюта отсутствует среди примеров
+    ],
+)
+def test_filter_by_currency(sample_transactions: List[Dict[str, Any]], currency_code: str, expected_ids: List[int]) -> None:
+    filtered = list(filter_by_currency(sample_transactions, currency_code))
+    actual_ids = [transaction["id"] for transaction in filtered]
+    assert sorted(actual_ids) == sorted(expected_ids)
 
 
-def test_filter_by_unmatched_currency(sample_transactions: List[Dict[str, Any]]) -> None:
-    eur_gen = filter_by_currency(sample_transactions, "JPY")
-    with pytest.raises(StopIteration):
-        next(eur_gen)
+# Проверяем генератор описаний транзакций с пустым списком и заполненным
+@pytest.mark.parametrize(
+    "transactions,expected_descriptions",
+    [
+        ([], []),
+        (
+            [
+                {"description": "Description1"},
+                {"description": "Description2"},
+                {"description": "Description3"},
+            ],
+            ["Description1", "Description2", "Description3"],
+        ),
+    ],
+)
+def test_transaction_descriptions(transactions: List[Dict[str, Any]], expected_descriptions: List[str]) -> None:
+    desc_gen = transaction_descriptions(transactions)
+    result_descriptions = list(desc_gen)
+    assert result_descriptions == expected_descriptions
 
 
-def test_empty_input() -> None:
-    empty_gen = filter_by_currency([], "USD")
-    with pytest.raises(StopIteration):
-        next(empty_gen)
-
-
-def test_transaction_descriptions(sample_transactions: List[Dict[str, Any]]) -> None:
-    desc_gen = transaction_descriptions(sample_transactions)
-    expected_descs = ["Description1", "Description2", "Description3"]
-    for idx, desc in enumerate(desc_gen):
-        assert desc == expected_descs[idx]
-
-
-def test_empty_descriptions() -> None:
-    gen = transaction_descriptions([])
-    with pytest.raises(StopIteration):
-        next(gen)
-
-
-def test_card_number_generator() -> None:
-    cards = list(card_number_generator(1, 5))
-    assert cards == ['0000 0000 0000 0001',
-                     '0000 0000 0000 0002',
-                     '0000 0000 0000 0003',
-                     '0000 0000 0000 0004',
-                     '0000 0000 0000 0005']
-
-
-def test_large_range() -> None:
-    first_five = list(card_number_generator(1_000_000, 1_000_004))
-    assert first_five == ['0000 0000 0100 0000',
-                          '0000 0000 0100 0001',
-                          '0000 0000 0100 0002',
-                          '0000 0000 0100 0003',
-                          '0000 0000 0100 0004'
-                          ]
+# Параметры для генератора карточных номеров
+@pytest.mark.parametrize(
+    "start,end,expected_cards",
+    [
+        (1, 5, ['0000 0000 0000 0001', '0000 0000 0000 0002', '0000 0000 0000 0003', '0000 0000 0000 0004', '0000 0000 0000 0005']),
+        (1_000_000, 1_000_004, ['0000 0000 0100 0000', '0000 0000 0100 0001', '0000 0000 0100 0002', '0000 0000 0100 0003', '0000 0000 0100 0004'])
+    ],
+)
+def test_card_number_generator(start: int, end: int, expected_cards: List[str]) -> None:
+    generated_cards = list(card_number_generator(start, end))
+    assert generated_cards == expected_cards

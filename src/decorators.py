@@ -23,6 +23,7 @@ def log(filename: Optional[str] = None) -> Callable[[Callable[..., Any]], Callab
         return wrapper
     return decorator
 
+
 def _write_log(message: str, filename: Optional[str]) -> None:
     """
     Записывает сообщение в файл или выводит в консоль.

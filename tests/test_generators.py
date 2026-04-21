@@ -1,6 +1,8 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 import pytest
-from generators import filter_by_currency, transaction_descriptions, card_number_generator
+
+from generators import card_number_generator, filter_by_currency, transaction_descriptions
 
 
 # Фикстура с примером транзакций
